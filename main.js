@@ -34,4 +34,53 @@ function addBookToLibrary(book) {
     book.libraryOrder = librarySize;
 }
 
+/* LIBRARY UI */
+
+
+//library DOM
+function createLibraryDOM(library){
+    let libraryDOM = document.createElement('div');
+    libraryDOM.className = "library"
+
+    let libraryOwnerDOM = document.createElement('h1');
+    libraryOwnerDOM.className = "libraryowner";
+    libraryOwnerDOM.textContent = library.owner;
+    let addBookButton = document.createElement('button');
+    addBookButton.id = "addbookbutton";
+    addBookButton.textContent = "+";
+    addBookButton.addEventListener('click', function(){
+        newBookForm()
+    })
+    let bookShelfDOM = document.createElement('div');
+    bookShelfDOM.className = "bookshelf";
+
+    libraryDOM.append(libraryOwnerDOM, addBookButton, bookShelfDOM);
+}
+
+//creates a book DOM
+function createBookDOM(book){
+    let bookDOM = document.createElement('div');
+    bookDOM.className = "book";
+
+    let titleDOM = document.createElement('h1');
+    titleDOM.className = "title";
+    titleDOM.textContent = book.title;
+    let authorDOM = document.createElement('h2');
+    authorDOM.className = "author";
+    authorDOM.textContent = book.author;
+    let readDOM = document.createElement('input');
+    readDOM.type = "checkbox";
+    readDOM.className = "readstatus";
+    readDOM.checked = book.read;
+    readDOM.addEventListener('change', function() {
+        book.read = readDOM.checked;
+    });
+    //remove book button
+
+    bookDOM.append(titleDOM, authorDOM, readDOM);
+
+    return bookDOM;
+}
+
+
 
