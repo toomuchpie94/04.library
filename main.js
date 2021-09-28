@@ -18,6 +18,18 @@ library.prototype.addBookToLibrary = function(book) {
     book.libraryOrder = librarySize;
 }
 
+//function to sort books alphabetically by title
+library.prototype.sortByTitle = function(){
+    this.books.sort((a,b) => a.title .localeCompare(b.title));
+    this.assignBookLocation();
+}
+
+//function to sort books alphabetically by author
+library.prototype.sortByAuthor = function(){
+    this.books.sort((a,b) => a.author.localeCompare(b.author));
+    this.assignBookLocation();
+}
+
 //book constructor
 function book(title, author) {
     this.title = title;
@@ -47,9 +59,27 @@ function createLibraryDOM(library){
 
     let libraryOwnerDOM = document.createElement('h1');
     libraryOwnerDOM.className = "libraryowner";
-    libraryOwnerDOM.textContent = library.owner;
+    libraryOwnerDOM.textContent = library.owner + "'s Library";
+
+    //BookshelfDOM is where books are located
     let bookShelfDOM = document.createElement('div');
     bookShelfDOM.className = "bookshelf";
+
+
+    //buttons to sort by title and author
+    let sortByContainer = document.createElement('ul');
+    sortByContainer.className = "sortcontainer"
+    sortByContainer.textContent = "Sort by:"
+    let sortByTitle = document.createElement('li');
+    sortByTitle.className = "sortbytitle";
+    sortByTitle.textContent = "Title";
+    sortByTitle.addEventListener('click', () => {sortBookDOMbyTitle(library, libraryDOM.querySelector('.bookshelf'))});
+    let sortByAuthor = document.createElement('li');
+    sortByAuthor.className = "sortbyauthor";
+    sortByAuthor.textContent = "Author";
+    sortByAuthor.addEventListener('click', () => {sortBookDOMbyAuthor(library, libraryDOM.querySelector('.bookshelf'))});
+    sortByContainer.append(sortByTitle, sortByAuthor);
+    
 
     //add book button will be on shelf
     let addBookButton = document.createElement('button');
@@ -61,8 +91,12 @@ function createLibraryDOM(library){
     });
     bookShelfDOM.appendChild(addBookButton);
 
-    libraryDOM.append(libraryOwnerDOM, bookShelfDOM);
     
+
+    libraryDOM.append(libraryOwnerDOM, sortByContainer, bookShelfDOM);
+    
+    
+
     return libraryDOM;
 }
 
@@ -100,7 +134,22 @@ function createNewBook(library, bookShelfDOM){
             bookShelfDOM.replaceChild(newBook, addBookButton);
         });
         bookShelfDOM.appendChild(addBookButton);
+    });
+
+    titleInput.addEventListener("keyup", function(e){
+        e.preventDefault();
+        if(e.keyCode === 13){
+            authorInput.focus();
+        }
     })
+
+    authorInput.addEventListener("keyup", function(e){
+        e.preventDefault();
+        if(e.keyCode === 13){
+            submitButton.click();
+        }
+    })
+
 
     
 
@@ -141,6 +190,56 @@ function createBookDOM(book){
 
     return bookDOM;
 }
+
+//sorts book shelf by title and author
+const sortBookDOMbyTitle = (library, bookShelfDOM) => {
+    let newBookShelfDOM = document.createElement('div');
+    newBookShelfDOM.className = "bookshelf";
+
+    library.sortByTitle();
+
+    for(i in library.books){
+        let newBookDOM = createBookDOM(library.books[i]);
+        newBookShelfDOM.appendChild(newBookDOM);
+    }
+
+    //adds addBookButton at the end of the library
+    let addBookButton = document.createElement('button');
+    addBookButton.id = "addbookbutton";
+    addBookButton.textContent = "+";
+    addBookButton.addEventListener('click', function(){
+        let newBook = createNewBook(library, newBookShelfDOM);
+        newBookShelfDOM.replaceChild(newBook, addBookButton);
+    });
+    newBookShelfDOM.appendChild(addBookButton);
+
+    bookShelfDOM.parentNode.replaceChild(newBookShelfDOM, bookShelfDOM);
+}
+
+const sortBookDOMbyAuthor = (library, bookShelfDOM) => {
+    let newBookShelfDOM = document.createElement('div');
+    newBookShelfDOM.className = "bookshelf";
+
+    library.sortByAuthor();
+
+    for(i in library.books){
+        let newBookDOM = createBookDOM(library.books[i]);
+        newBookShelfDOM.appendChild(newBookDOM);
+    }
+
+    //adds addBookButton at the end of the library
+    let addBookButton = document.createElement('button');
+    addBookButton.id = "addbookbutton";
+    addBookButton.textContent = "+";
+    addBookButton.addEventListener('click', function(){
+        let newBook = createNewBook(library, newBookShelfDOM);
+        newBookShelfDOM.replaceChild(newBook, addBookButton);
+    });
+    newBookShelfDOM.appendChild(addBookButton);
+
+    bookShelfDOM.parentNode.replaceChild(newBookShelfDOM, bookShelfDOM);
+}
+
 
 
 
