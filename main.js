@@ -14,7 +14,6 @@ library.prototype.assignBookLocation = function() {
 library.prototype.addBookToLibrary = function(book) {
     let librarySize = this.books.length;
     this.books.push(book);
-    book.library = this;
     book.libraryOrder = librarySize;
 }
 
@@ -30,11 +29,16 @@ library.prototype.sortByAuthor = function(){
     this.assignBookLocation();
 }
 
+//removes book from library
+library.prototype.removeBookFromLibrary = function(book) {
+    this.books.splice(book.libraryOrder,1);
+    this.assignBookLocation();
+}
+
 //book constructor
 function book(title, author) {
     this.title = title;
     this.author = author;
-    this.library = '';
     this.libraryOrder = 0; //determines location in library for easy removal
     this.read = false;
 }
@@ -42,13 +46,6 @@ function book(title, author) {
 book.prototype.markAsRead = function() {
     this.read = !this.read;
 }
-//removes book from library
-book.prototype.removeBookFromLibrary = function() {
-    this.library.books.splice(this.libraryOrder,1);
-    this.library.assignBookLocation();
-}
-
-
 
 /* LIBRARY UI */
 
@@ -79,6 +76,12 @@ function createLibraryDOM(library){
     sortByAuthor.textContent = "Author";
     sortByAuthor.addEventListener('click', () => {sortBookDOMbyAuthor(library, libraryDOM.querySelector('.bookshelf'))});
     sortByContainer.append(sortByTitle, sortByAuthor);
+
+    //add existing books to shelf
+    for(i in library.books){
+        let newBookDOM = createBookDOM(library, library.books[i]);
+        bookShelfDOM.appendChild(newBookDOM);
+    }
     
 
     //add book button will be on shelf
@@ -122,7 +125,7 @@ function createNewBook(library, bookShelfDOM){
         let author = authorInput.value;
         let newBook = new book(title, author);
         library.addBookToLibrary(newBook);
-        let newBookDOM = createBookDOM(newBook);
+        let newBookDOM = createBookDOM(library, newBook);
         newBookForm.parentNode.replaceChild(newBookDOM, newBookForm);
 
         //adds addBookButton at the end of the library
@@ -134,6 +137,10 @@ function createNewBook(library, bookShelfDOM){
             bookShelfDOM.replaceChild(newBook, addBookButton);
         });
         bookShelfDOM.appendChild(addBookButton);
+
+
+        //
+        saveLibrary(library)
     });
 
     titleInput.addEventListener("keyup", function(e){
@@ -159,7 +166,7 @@ function createNewBook(library, bookShelfDOM){
 }
 
 //creates a book DOM
-function createBookDOM(book){
+function createBookDOM(library, book){
     let bookDOM = document.createElement('div');
     bookDOM.className = "book";
 
@@ -182,7 +189,7 @@ function createBookDOM(book){
     removeBookButton.className = 'removebook'
     removeBookButton.textContent = 'x';
     removeBookButton.addEventListener('click', function(){
-        book.removeBookFromLibrary();
+        library.removeBookFromLibrary(book);
         bookDOM.parentNode.removeChild(bookDOM);
     })
 
@@ -199,7 +206,7 @@ const sortBookDOMbyTitle = (library, bookShelfDOM) => {
     library.sortByTitle();
 
     for(i in library.books){
-        let newBookDOM = createBookDOM(library.books[i]);
+        let newBookDOM = createBookDOM(library, library.books[i]);
         newBookShelfDOM.appendChild(newBookDOM);
     }
 
@@ -214,6 +221,9 @@ const sortBookDOMbyTitle = (library, bookShelfDOM) => {
     newBookShelfDOM.appendChild(addBookButton);
 
     bookShelfDOM.parentNode.replaceChild(newBookShelfDOM, bookShelfDOM);
+
+    //
+    saveLibrary(library)
 }
 
 const sortBookDOMbyAuthor = (library, bookShelfDOM) => {
@@ -223,7 +233,7 @@ const sortBookDOMbyAuthor = (library, bookShelfDOM) => {
     library.sortByAuthor();
 
     for(i in library.books){
-        let newBookDOM = createBookDOM(library.books[i]);
+        let newBookDOM = createBookDOM(library, library.books[i]);
         newBookShelfDOM.appendChild(newBookDOM);
     }
 
@@ -238,14 +248,22 @@ const sortBookDOMbyAuthor = (library, bookShelfDOM) => {
     newBookShelfDOM.appendChild(addBookButton);
 
     bookShelfDOM.parentNode.replaceChild(newBookShelfDOM, bookShelfDOM);
+
+    //
+    saveLibrary(library)
+}
+
+//saves library locally
+function saveLibrary(library){
+    console.log('library saved');
+    window.localStorage.setItem(library.owner, JSON.stringify(library));
 }
 
 
-
-
-
 let content = document.querySelector('#content');
-let myLibrary = new library('alex');
+let myLibrary = new library('Alex');
+let recoveredLibrary = JSON.parse(window.localStorage.getItem('Alex'));
+myLibrary.books = recoveredLibrary.books;
 let myLibraryDOM = createLibraryDOM(myLibrary);
 content.appendChild(myLibraryDOM)
 
